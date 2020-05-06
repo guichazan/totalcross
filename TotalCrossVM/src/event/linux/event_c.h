@@ -193,8 +193,8 @@ void privatePumpEvent(Context currentContext)
          if(event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
             int width, height;
             SDL_GetWindowSize(window, &width, &height);
-            screenChange(mainContext, width, height,0,0,false);
-            printf("size changed!");
+            // screenChange(mainContext, width, height,0,0,false);
+            printf("Exe log: size changed!\n");
          }
          sdlPresent();
       }

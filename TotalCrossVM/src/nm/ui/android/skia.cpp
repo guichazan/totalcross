@@ -93,14 +93,16 @@ void initSkia(int w, int h)
 {
     SKIA_TRACE()
 #ifdef HEADLESS
-    // SkImageInfo ii = SkImageInfo::Make(w, h, kRGB_565_SkColorType, kPremul_SkAlphaType);
-    // bitmap.allocPixels(ii, ii.minRowBytes());
+    SkImageInfo ii = SkImageInfo::Make(w, h, (SkColorType)pixelFormatCavalo, kPremul_SkAlphaType);
+    bitmap.allocPixels(ii, ii.minRowBytes());
 
-        // SkBitmap bitmap;
-           bitmap.installPixels(SkImageInfo::Make(w, h, 
-           (SkColorType)ColorFormatSDL2Skia(sdlsurface->format->format), kPremul_SkAlphaType), sdlsurface->pixels, sdlsurface->pitch);
-
+    // SkBitmap bitmap;
+    printf("Step 08: before bitmap install pixels\n");
+    // bitmap.installPixels(SkImageInfo::Make(w, h, 
+    // (SkColorType)ColorFormatSDL2Skia(sdlsurface->format->format), kPremul_SkAlphaType), sdlsurface->pixels, sdlsurface->pitch);
+    printf("Step 09: after bitmap install pixels and before SkCanvas instantiation\n");
     canvas = new SkCanvas(bitmap);
+    printf("Step 10: after SkCanvas instantiation\n");
 #else
     // To use Skia's GPU backend, a OpenGL context is needed. Skia uses the "Gr" library to abstract
     // the different OpenGL variants (Core, ES, etc). Most of the code bellow is dedicated to create
@@ -130,6 +132,7 @@ void initSkia(int w, int h)
     surface = gpuSurface;
     canvas = gpuCanvas;
 #endif
+    printf("Step 11: before forePaint stuff\n");
     // The forepaint is used for "draw" methods
     forePaint.setStyle(SkPaint::kStroke_Style);
     forePaint.setTextSize(16);
@@ -144,17 +147,22 @@ void initSkia(int w, int h)
 
     backPaint.setAntiAlias(true);
     backPaint.setLCDRenderText(true);
+    printf("Step 12: before canvas clear and flushSkia\n");
     canvas->clear(SK_ColorWHITE);
+    // skia_fillRect(0,30,30,50,50,0xff00ff00);
     flushSkia();
+    printf("Step 13: after flushSkia\n");
 }
 
 // Tells Skia to fullfill all draw commands
 void flushSkia()
 {
+    // printf("Step 14: before flush\n");
     canvas->flush();
+    // printf("Step 15: after flush\n");
 #ifdef HEADLESS
-    // updateSDLScreen(bitmap.width(), bitmap.height(), bitmap.getPixels());
-    updateSDLScreen(0, 0, NULL);
+    updateSDLScreen(bitmap.width(), bitmap.height(), bitmap.getPixels());
+    // updateSDLScreen(0, 0, NULL);
 #endif
 }
 
@@ -310,6 +318,7 @@ void skia_drawRect(int32 skiaSurface, int32 x, int32 y, int32 w, int32 h, Pixel 
 void skia_fillRect(int32 skiaSurface, int32 x, int32 y, int32 w, int32 h, Pixel pixel)
 {
     SKIA_TRACE()
+    // printf("Exe log: skia fill rect = %#010x\n",pixel);
     backPaint.setColor(pixel);
     canvas->drawRect(SkRect::MakeXYWH(x, y, w, h), backPaint);
 }

@@ -20,6 +20,7 @@ static SDL_Renderer *renderer;
  SDL_Surface *sdlsurface;
 Uint32 timeout;
 SDL_Surface* surface2;
+int32 pixelFormatCavalo;
 
 #define TICKS_FOR_NEXT_FRAME 22
 
@@ -41,22 +42,24 @@ int initSDL(ScreenSurface screen) {
 
   
 
-//   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
-//                                                 SDL_RENDERER_PRESENTVSYNC);
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
+                                                SDL_RENDERER_PRESENTVSYNC);
 
-//   int texWidth;
-//   int texHeight;
-//   printf("3\n");
-//   SDL_GetRendererOutputSize(renderer, &texWidth, &texHeight);
+  int texWidth;
+  int texHeight;
+  printf("3\n");
+  SDL_GetRendererOutputSize(renderer, &texWidth, &texHeight);
 
-// Uint32 pixelformat = SDL_GetWindowPixelFormat(window);
+Uint32 pixelformat = SDL_GetWindowPixelFormat(window);
+pixelFormatCavalo = ColorFormatSDL2Skia(pixelformat);
 
-//   printf("4 %s\n", SDL_GetPixelFormatName(pixelformat));
-  // texture = SDL_CreateTexture(renderer, pixelformat,
-  //                             SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
-sdlsurface = SDL_GetWindowSurface(window);
-if(sdlsurface == NULL ) printf("SDL_Init failed: init %s\n", SDL_GetError());
-  timeout = SDL_GetTicks() + TICKS_FOR_NEXT_FRAME;
+printf("4 %s\n", SDL_GetPixelFormatName(pixelformat));
+texture = SDL_CreateTexture(renderer, pixelformat,
+                            SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+// sdlsurface = SDL_GetWindowSurface(window);
+// if(sdlsurface == NULL ) printf("SDL_Init failed: init %s\n", SDL_GetError());
+//   printf("Step 07: checking SDL surface - SDL log: %d\n", sdlsurface);
+//   timeout = SDL_GetTicks() + TICKS_FOR_NEXT_FRAME;
   return 1;
 }
 
@@ -64,23 +67,24 @@ void updateSDLScreen(int w, int h, void *pixels) {
   int i;
   // int* p = (int*) sdlsurface->pixels;
 
-// memcpy(p, pixels, sizeof(int) * w * h * 2);
+  // memcpy(p, pixels, sizeof(int) * w * h * 2);
   // printf("20 pixels: %d \n", pixels);
   // for (i = 0 ; i < w * h * 2 ; i++) {
   //   p[i] = 0xFF;
   // }
-  SDL_UpdateWindowSurface(window);
   
-  // SDL_SetRenderTarget(renderer, texture);
+  // SDL_UpdateWindowSurface(window);
+  
+  SDL_SetRenderTarget(renderer, texture);
   // SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-  // // SDL_UpdateTexture(texture, NULL, pixels, w * 2);
-  // SDL_RenderClear(renderer);
+  SDL_UpdateTexture(texture, NULL, pixels, w * 4);
+  SDL_RenderClear(renderer);
   // printf("21\n");
-  // SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
   // printf("22\n");
-  // SDL_RenderPresent(renderer);
+  SDL_RenderPresent(renderer);
   // printf("23\n");
-  // SDL_RenderClear(renderer);
+  SDL_RenderClear(renderer);
 }
 
 bool sdlPresent() {

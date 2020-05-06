@@ -37,20 +37,24 @@ static int executeProgram(char* cmdline)
    int ret = 0;
    ExecuteProgramProc fExecuteProgram = NULL;
    Handle tcvm;
+   printf("Step 02: before try open libtcvm in .\n");
    tcvm = tryOpen("./libtcvm");                        // load in current folder - otherwise, we'll not be able to debug
-   
+   printf("Step 03: after try open libtcvm in .. - VM log: %d\n", tcvm);
    if (!tcvm) {
       printf("%s\n", dlerror());
       tcvm = tryOpen("../libtcvm");                  // load in parent folder
    }
+   printf("Step 04: after try open libtcvm in ../ - VM log: %d\n", tcvm);
    if (!tcvm) {
       printf("%s\n", dlerror());
       tcvm = tryOpen("/usr/lib/totalcross/libtcvm"); // load in most common absolute path
    }
+   printf("Step 05: after try open libtcvm in /usr/lib/totalcross/ - VM log: %d\n", tcvm);
    if (!tcvm) {
       printf("%s\n", dlerror());
       return 10000;
    }
+   printf("Step 06: after not found/open libtcvm - VM log: %d\n", tcvm);
    fExecuteProgram = (ExecuteProgramProc)dlsym(tcvm, TEXT("executeProgram"));
    if (!fExecuteProgram)
       return 10001;
@@ -84,6 +88,7 @@ static int screen_height = 0;
 
 int main(int argc, const char *argv[])
 {
+   printf("Step 01: run main routine\n");
    char cmdline[512];
    xmemzero(cmdline,sizeof(cmdline));
    if (argv)

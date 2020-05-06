@@ -31,7 +31,7 @@
 bool initGraphicsBeforeSettings(Context currentContext, int16 appTczAttr) // no thread are running at this point
 {
    return startupGraphics(appTczAttr) && createScreenSurface(currentContext, false) && (screen.bpp != 8 || createColorPaletteLookupTables());
-}
+} 
 
 void destroyGraphics()
 {
@@ -265,7 +265,7 @@ TC_API void tugG_drawPolyline_IIi(NMParams p) // totalcross/ui/gfx/Graphics nati
 TC_API void tugG_drawText_siii(NMParams p) // totalcross/ui/gfx/Graphics native public void drawText(String text, int x, int y, int justifyWidth);
 {
 	TCObject text;
-	TCObject g = p->obj[0];
+	TCObject g = p->obj[0]; 
 	if ((text = p->obj[1]) != null)
 		drawText(p->currentContext, g, String_charsStart(text), String_charsLen(text), p->i32[0], p->i32[1], Graphics_forePixel(g), p->i32[2]);
 }
@@ -309,6 +309,13 @@ TC_API void tugG_copyImageRect_iiiiib(NMParams p) // totalcross/ui/gfx/Graphics 
    TCObject surfOrig = p->obj[1];
    if (surfOrig) drawSurface(p->currentContext, surfDest, surfOrig, p->i32[0], p->i32[1], p->i32[2], p->i32[3], 0,0, (bool)p->i32[4]);
 }
+//////////////////////////////////////////////////////////////////////////
+// TC_API void tugG_copyImageRect_iiiiib(NMParams p) // totalcross/ui/gfx/Graphics native public void copyImageRect(totalcross.ui.image.Image image, int x, int y, int width, int height, boolean doClip);
+// {
+//    TCObject surfDest = p->obj[0];
+//    TCObject surfOrig = p->obj[1];
+//    if (surfOrig) drawSurface(p->currentContext, surfDest, surfOrig, p->i32[0], p->i32[1], p->i32[2], p->i32[3], 0,0, (bool)p->i32[4]);
+// }
 //////////////////////////////////////////////////////////////////////////
 TC_API void tugG_setPixels_IIi(NMParams p) // totalcross/ui/gfx/Graphics native public void setPixels(int []xPoints, int []yPoints, int nPoints);
 {

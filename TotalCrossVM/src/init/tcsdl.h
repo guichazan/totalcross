@@ -19,6 +19,7 @@ extern "C" {
 extern SDL_Surface *sdlsurface;
 extern SDL_Window *window;
 extern SDL_Surface* surface2;
+extern int32 pixelFormatCavalo;
 int initSDL(ScreenSurface screen);
 void updateSDLScreen(int w, int h, void *pixels);
 int ColorFormatSDL2Skia (int pixelFormat);

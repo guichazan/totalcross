@@ -93,13 +93,13 @@ void initSkia(int w, int h)
 {
     SKIA_TRACE()
 #ifdef HEADLESS
-    SkImageInfo ii = SkImageInfo::Make(w, h, (SkColorType)pixelFormatCavalo, kPremul_SkAlphaType);
-    bitmap.allocPixels(ii, ii.minRowBytes());
+    // SkImageInfo ii = SkImageInfo::Make(w, h, (SkColorType)pixelFormatCavalo, kPremul_SkAlphaType);
+    // bitmap.allocPixels(ii, ii.minRowBytes());
 
     // SkBitmap bitmap;
     printf("Step 08: before bitmap install pixels\n");
-    // bitmap.installPixels(SkImageInfo::Make(w, h, 
-    // (SkColorType)ColorFormatSDL2Skia(sdlsurface->format->format), kPremul_SkAlphaType), sdlsurface->pixels, sdlsurface->pitch);
+    bitmap.installPixels(SkImageInfo::Make(w, h, 
+                                    (SkColorType)ColorFormatSDL2Skia(sdlsurface->format->format), kPremul_SkAlphaType), sdlsurface->pixels, sdlsurface->pitch);
     printf("Step 09: after bitmap install pixels and before SkCanvas instantiation\n");
     canvas = new SkCanvas(bitmap);
     printf("Step 10: after SkCanvas instantiation\n");

@@ -8,97 +8,101 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-only
 
+#define BITS_PER_PIXEL 16
+#define PIXEL_NATIVE_FORMAT 1
+#define DISPLAY_INDEX 0
+#define NO_FLAGS 0
+#define PITCH_MULTIPLIER 4
+
 #include "tcvm.h"
 #include "tcsdl.h"
-#include "SDL2/SDL.h"
-#include "SkImageInfo.h"
+#include "SkImage.h"
 
-static SDL_Texture
-*texture; // even with SDL2, we can still bring ancient code back
 SDL_Window *window;
-static SDL_Renderer *renderer;
 SDL_Surface *sdlsurface;
-Uint32 timeout;
-SDL_Surface* surface2;
-int32 pixelFormatCavalo;
 
-#define TICKS_FOR_NEXT_FRAME 22
+static SDL_Renderer *renderer;
+static SDL_Texture *texture;
+
+Uint32 timeout;
 
 int initSDL(ScreenSurface screen) {
-  if(SDL_Init(SDL_INIT_VIDEO) < 0) printf("SDL_Init failed: init %s\n", SDL_GetError()); // init video
-  SDL_Rect rect;
-  if(SDL_GetDisplayBounds(0, &rect) < 0 ) printf("SDL_Init failed: display %s\n", SDL_GetError());
+  // Only init video (without audio)
+  if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+    printf("SDL_Init failed: %s\n", SDL_GetError()); 
+  }
 
-  // create the window like normal
-  window = SDL_CreateWindow("TotalCross SDK", SDL_WINDOWPOS_UNDEFINED,
-                            SDL_WINDOWPOS_UNDEFINED, rect.w, rect.h, 
+  // Get the desktop area represented by a display, with the primary
+  // display located at 0,0 based on rect allocated on initial position
+  SDL_Rect rect;
+  if(SDL_GetDisplayBounds(DISPLAY_INDEX, &rect) < 0 ) {
+    printf("SDL_GetDisplayBounds failed: %s\n", SDL_GetError());
+  }
+  
+  // Create the window
+  window = SDL_CreateWindow("TotalCross SDK", 
+                            SDL_WINDOWPOS_UNDEFINED,
+                            SDL_WINDOWPOS_UNDEFINED, 
+                            rect.w, 
+                            rect.h, 
                             SDL_WINDOW_FULLSCREEN);
   if(window == NULL) {
-    printf("SDL_Init failed: window %s\n", SDL_GetError());
+    printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
   }
-   SDL_GetWindowSize(window, &screen->screenW, &screen->screenH);
-   screen->bpp = 16;
-   screen->pixels = (uint8*)1;
 
-  
+  // Get the size of a window's client area.
+  SDL_GetWindowSize(window, &screen->screenW, &screen->screenH);
+  // Adjusts screen's BPP
+  screen->bpp = BITS_PER_PIXEL;
+  // Adjusts screen's pixel format
+  screen->pixels = (uint8*)PIXEL_NATIVE_FORMAT;
 
-  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
-                                                SDL_RENDERER_PRESENTVSYNC);
+  // Create a 2D rendering context for a window.
+  renderer = SDL_CreateRenderer(window, -1, NO_FLAGS);
+  if(renderer == NULL) {
+    printf("SDL_CreateRenderer failed: %s\n", SDL_GetError());
+  }
 
-//   int texWidth;
-//   int texHeight;
-//   printf("3\n");
-//   SDL_GetRendererOutputSize(renderer, &texWidth, &texHeight);
+  // Print renderer driver information
+  SDL_RendererInfo rendererInfo;
+  SDL_GetRendererInfo(renderer, &rendererInfo);
+  printf("Renderer info: %s\n", rendererInfo.name);
 
-// Uint32 pixelformat = SDL_GetWindowPixelFormat(window);
-// pixelFormatCavalo = ColorFormatSDL2Skia(pixelformat);
+  // Set render driver 
+  SDL_SetHint(SDL_HINT_RENDER_DRIVER, rendererInfo.name);
 
-// printf("4 %s\n", SDL_GetPixelFormatName(pixelformat));
-// texture = SDL_CreateTexture(renderer, pixelformat,
-//                             SDL_TEXTUREACCESS_STREAMING, texWidth, texHeight);
+  // Get the SDL surface associated with the window.
   sdlsurface = SDL_GetWindowSurface(window);
-  // if(sdlsurface == NULL ) printf("SDL_Init failed: init %s\n", SDL_GetError());
-  // printf("Step 07: checking SDL surface - SDL log: %d\n", sdlsurface);
-  // timeout = SDL_GetTicks() + TICKS_FOR_NEXT_FRAME;
-  texture = SDL_CreateTextureFromSurface(renderer, sdlsurface);
+  if(sdlsurface == NULL) {
+    printf("SDL_GetWindowSurface failed: %s\n", SDL_GetError());
+  }
 
-  // SDL_FreeSurface(sdlsurface);
+  // Create a texture from an existing sdlsurface.
+  texture = SDL_CreateTextureFromSurface(renderer, sdlsurface);
+  if(texture == NULL) {
+    printf("SDL_CreateTextureFromSurface: %s\n", SDL_GetError());
+  }
   return 1;
 }
 
 void updateSDLScreen(int w, int h, void *pixels) {
-  int i;
-  // int* p = (int*) sdlsurface->pixels;
-
-  // memcpy(p, pixels, sizeof(int) * w * h * 2);
-  // printf("20 pixels: %d \n", pixels);
-  // for (i = 0 ; i < w * h * 2 ; i++) {
-  //   p[i] = 0xFF;
-  // }
-  
-  
-  // if(!texture) {
-  //   SDL_UpdateWindowSurface(window);
-  // }
-  // else {
-    SDL_SetRenderTarget(renderer, texture);
-    // SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
-    SDL_UpdateTexture(texture, NULL, pixels, w * 4);
-    SDL_RenderClear(renderer);
-    // printf("21\n");
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    // printf("22\n");
-    SDL_RenderPresent(renderer);
-    // printf("23\n");
-    SDL_RenderClear(renderer);
-  // }
+  // Set a texture as the current rendering target.
+  SDL_SetRenderTarget(renderer, texture);
+  // Update the given texture rectangle with new pixel data.
+  SDL_UpdateTexture(texture, NULL, pixels, w * PITCH_MULTIPLIER);
+  // Call SDL render present 
+  sdlPresent();
 }
 
 bool sdlPresent() {
   if (SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
-    // SDL_RenderPresent(renderer);
-    SDL_UpdateWindowSurface(window);
-    timeout = SDL_GetTicks() + TICKS_FOR_NEXT_FRAME;
+    // This function clears the entire rendering target, ignoring the viewport and
+    // the clip rectangle.
+    SDL_RenderClear(renderer);
+    // Copy a portion of the texture to the current rendering target.
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // Update the screen with rendering performed.
+    SDL_RenderPresent(renderer);
     return 0;
   }
   return 1;

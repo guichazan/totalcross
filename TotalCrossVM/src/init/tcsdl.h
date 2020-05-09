@@ -10,20 +10,22 @@
 
 #ifndef TCSDL_H
 #define TCSDL_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "SDL2/SDL.h"
-#include "GraphicsPrimitives.h"
 
-extern SDL_Surface *sdlsurface;
-extern SDL_Window *window;
-extern SDL_Surface* surface2;
-extern int32 pixelFormatCavalo;
-int initSDL(ScreenSurface screen);
-void updateSDLScreen(int w, int h, void *pixels);
-int ColorFormatSDL2Skia (int pixelFormat);
-bool sdlPresent();
+    #include "SDL2/SDL.h"
+    #include "GraphicsPrimitives.h"
+
+    extern SDL_Window *window;
+    extern SDL_Surface *sdlsurface;
+
+    int initSDL(ScreenSurface screen);
+    void updateSDLScreen(int w, int h, void *pixels);
+    bool sdlPresent();
+    int ColorFormatSDL2Skia (int pixelFormat);
+
 #ifdef __cplusplus
 }
 #endif

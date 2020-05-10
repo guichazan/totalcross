@@ -196,7 +196,7 @@ void privatePumpEvent(Context currentContext)
             // screenChange(mainContext, width, height,0,0,false);
             printf("Exe log: size changed!\n");
          }
-         sdlPresent();
+         presentSDL();
       }
       if(event.type >= SDL_FINGERDOWN && event.type <= SDL_FINGERMOTION) { // Finger Touch Events
          handleFingerTouchEvent(event);

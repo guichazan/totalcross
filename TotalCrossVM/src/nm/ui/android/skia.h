@@ -13,6 +13,7 @@ typedef unsigned int uint32;
 typedef uint32 Pixel32; // 32 bpp
 typedef Pixel32 Pixel;
 
+int colorType(int index);
 void initSkia(int w, int h);
 void flushSkia();
 

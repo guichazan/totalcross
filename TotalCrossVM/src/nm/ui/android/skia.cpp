@@ -98,8 +98,9 @@ void initSkia(int w, int h)
 
     // SkBitmap bitmap;
     printf("Step 08: before bitmap install pixels\n");
-    bitmap.installPixels(SkImageInfo::Make(w, h, 
-                                    (SkColorType)ColorFormatSDL2Skia(sdlsurface->format->format), kPremul_SkAlphaType), sdlsurface->pixels, sdlsurface->pitch);
+    bitmap.installPixels(SkImageInfo::Make(w, 
+                                           h, 
+                                           (SkColorType)colorType(pixelFormatSDL(surfaceSDL->format->format)), kPremul_SkAlphaType), surfaceSDL->pixels, surfaceSDL->pitch);
     printf("Step 09: after bitmap install pixels and before SkCanvas instantiation\n");
     canvas = new SkCanvas(bitmap);
     printf("Step 10: after SkCanvas instantiation\n");
@@ -161,8 +162,8 @@ void flushSkia()
     canvas->flush();
     // printf("Step 15: after flush\n");
 #ifdef HEADLESS
-    updateSDLScreen(bitmap.width(), bitmap.height(), bitmap.getPixels());
-    // updateSDLScreen(0, 0, NULL);
+    updateScreenSDL(bitmap.width(), bitmap.height(), bitmap.getPixels());
+    // updateScreenSDL(0, 0, NULL);
 #endif
 }
 
@@ -590,3 +591,45 @@ extern "C" JNIEXPORT void JNICALL Java_totalcross_Launcher4A_drawIntoBitmap(JNIE
     AndroidBitmap_unlockPixels(env, dstBitmap);
 }
 #endif
+
+int colorType(int index) {
+    switch (index) {
+        case  0 : return kUnknown_SkColorType  ;
+        case  1 : return kUnknown_SkColorType  ;
+        case  2 : return kUnknown_SkColorType  ;
+        case  3 : return kUnknown_SkColorType  ;
+        case  4 : return kUnknown_SkColorType  ;
+        case  5 : return kUnknown_SkColorType  ;
+        case  6 : return kUnknown_SkColorType  ;
+        case  7 : return kUnknown_SkColorType  ;
+        case  8 : return kUnknown_SkColorType  ;
+        case  9 : return kUnknown_SkColorType  ;
+        case 10 : return kARGB_4444_SkColorType;
+        case 11 : return kUnknown_SkColorType  ;
+        case 12 : return kUnknown_SkColorType  ;
+        case 13 : return kUnknown_SkColorType  ;
+        case 14 : return kUnknown_SkColorType  ;
+        case 15 : return kRGBA_8888_SkColorType;
+        case 16 : return kUnknown_SkColorType  ;
+        case 17 : return kUnknown_SkColorType  ;
+        case 18 : return kRGB_565_SkColorType  ;
+        case 19 : return kUnknown_SkColorType  ;
+        case 20 : return kUnknown_SkColorType  ;
+        case 21 : return kUnknown_SkColorType  ;
+        case 22 : return kBGRA_8888_SkColorType;
+        case 23 : return kRGBA_8888_SkColorType;
+        case 24 : return kBGRA_8888_SkColorType;
+        case 25 : return kBGRA_8888_SkColorType;
+        case 26 : return kUnknown_SkColorType  ;
+        case 27 : return kRGBA_8888_SkColorType;
+        case 28 : return kUnknown_SkColorType  ;
+        case 29 : return kBGRA_8888_SkColorType;
+        case 30 : return kUnknown_SkColorType  ;
+        case 31 : return kUnknown_SkColorType  ;
+        case 32 : return kUnknown_SkColorType  ;
+        case 33 : return kUnknown_SkColorType  ;
+        case 34 : return kUnknown_SkColorType  ;
+        case 35 : return kUnknown_SkColorType  ;
+        default : return kUnknown_SkColorType  ;
+    }
+}

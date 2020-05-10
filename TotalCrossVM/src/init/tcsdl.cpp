@@ -14,12 +14,10 @@
 #define NO_FLAGS 0
 #define PITCH_MULTIPLIER 4
 
-#include "tcvm.h"
 #include "tcsdl.h"
-#include "SkImage.h"
 
 SDL_Window *window;
-SDL_Surface *sdlsurface;
+SDL_Surface *surfaceSDL;
 
 static SDL_Renderer *renderer;
 static SDL_Texture *texture;
@@ -72,81 +70,75 @@ int initSDL(ScreenSurface screen) {
   SDL_SetHint(SDL_HINT_RENDER_DRIVER, rendererInfo.name);
 
   // Get the SDL surface associated with the window.
-  sdlsurface = SDL_GetWindowSurface(window);
-  if(sdlsurface == NULL) {
+  surfaceSDL = SDL_GetWindowSurface(window);
+  if(surfaceSDL == NULL) {
     printf("SDL_GetWindowSurface failed: %s\n", SDL_GetError());
   }
 
-  // Create a texture from an existing sdlsurface.
-  texture = SDL_CreateTextureFromSurface(renderer, sdlsurface);
+  // Create a texture from an existing surfaceSDL.
+  texture = SDL_CreateTextureFromSurface(renderer, surfaceSDL);
   if(texture == NULL) {
     printf("SDL_CreateTextureFromSurface: %s\n", SDL_GetError());
   }
   return 1;
 }
 
-void updateSDLScreen(int w, int h, void *pixels) {
+void updateScreenSDL(int w, int h, void *pixels) {
   // Set a texture as the current rendering target.
   SDL_SetRenderTarget(renderer, texture);
   // Update the given texture rectangle with new pixel data.
   SDL_UpdateTexture(texture, NULL, pixels, w * PITCH_MULTIPLIER);
   // Call SDL render present 
-  sdlPresent();
+  presentSDL();
 }
 
-bool sdlPresent() {
-  if (SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
-    // This function clears the entire rendering target, ignoring the viewport and
-    // the clip rectangle.
-    SDL_RenderClear(renderer);
-    // Copy a portion of the texture to the current rendering target.
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    // Update the screen with rendering performed.
-    SDL_RenderPresent(renderer);
-    return 0;
-  }
-  return 1;
+void presentSDL() {
+  // This function clears the entire rendering target, ignoring the viewport and
+  // the clip rectangle.
+  SDL_RenderClear(renderer);
+  // Copy a portion of the texture to the current rendering target.
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  // Update the screen with rendering performed.
+  SDL_RenderPresent(renderer);
 }
 
-int ColorFormatSDL2Skia (int pixelFormat) {
-  switch (pixelFormat)
-  { 
-    case SDL_PIXELFORMAT_UNKNOWN    	: return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_INDEX1LSB	  : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_INDEX1MSB		: return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_INDEX4LSB		: return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_INDEX4MSB	  : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_INDEX8		    : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB332		    : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB444		    : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB555		    : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_BGR555	      : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_ARGB4444	    : return 	kARGB_4444_SkColorType;
-    case SDL_PIXELFORMAT_RGBA4444	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_ABGR4444		  : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_BGRA4444	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_ARGB1555	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGBA5551	    : return	kRGBA_8888_SkColorType;
-    case SDL_PIXELFORMAT_ABGR1555	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_BGRA5551	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB565		    : return  kRGB_565_SkColorType;
-    case SDL_PIXELFORMAT_BGR565	      : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB24		    : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_BGR24	      : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGB888	      : return	kBGRA_8888_SkColorType;
-    case SDL_PIXELFORMAT_RGBX8888   	: return	kRGBA_8888_SkColorType;
-    case SDL_PIXELFORMAT_BGR888	      : return	kBGRA_8888_SkColorType;
-    case SDL_PIXELFORMAT_BGRX8888	    : return 	kBGRA_8888_SkColorType;
-    case SDL_PIXELFORMAT_ARGB8888	    : return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_RGBA8888		  : return  kRGBA_8888_SkColorType;
-    case SDL_PIXELFORMAT_ABGR8888		  : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_BGRA8888	    : return	kBGRA_8888_SkColorType;
-    case SDL_PIXELFORMAT_ARGB2101010	: return	kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_YV12		      : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_IYUV		      : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_YUY2		      : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_UYVY		      : return  kUnknown_SkColorType;
-    case SDL_PIXELFORMAT_YVYU		      : return  kUnknown_SkColorType;
-    default                           : return  kUnknown_SkColorType;
+int pixelFormatSDL (int pixelFormat) {
+  switch (pixelFormat) { 
+    case SDL_PIXELFORMAT_UNKNOWN    	: return  0;
+    case SDL_PIXELFORMAT_INDEX1LSB	  : return  1;
+    case SDL_PIXELFORMAT_INDEX1MSB		: return  2;
+    case SDL_PIXELFORMAT_INDEX4LSB		: return  3;
+    case SDL_PIXELFORMAT_INDEX4MSB	  : return  4;
+    case SDL_PIXELFORMAT_INDEX8		    : return  5;
+    case SDL_PIXELFORMAT_RGB332		    : return  6;
+    case SDL_PIXELFORMAT_RGB444		    : return  7;
+    case SDL_PIXELFORMAT_RGB555		    : return  8;
+    case SDL_PIXELFORMAT_BGR555	      : return  9;
+    case SDL_PIXELFORMAT_ARGB4444	    : return 10;
+    case SDL_PIXELFORMAT_RGBA4444	    : return 11;
+    case SDL_PIXELFORMAT_ABGR4444		  : return 12;
+    case SDL_PIXELFORMAT_BGRA4444	    : return 13;
+    case SDL_PIXELFORMAT_ARGB1555	    : return 14;
+    case SDL_PIXELFORMAT_RGBA5551	    : return 15;
+    case SDL_PIXELFORMAT_ABGR1555	    : return 16;
+    case SDL_PIXELFORMAT_BGRA5551	    : return 17;
+    case SDL_PIXELFORMAT_RGB565		    : return 18;
+    case SDL_PIXELFORMAT_BGR565	      : return 19;
+    case SDL_PIXELFORMAT_RGB24		    : return 20;
+    case SDL_PIXELFORMAT_BGR24	      : return 21;
+    case SDL_PIXELFORMAT_RGB888	      : return 22;
+    case SDL_PIXELFORMAT_RGBX8888   	: return 23;
+    case SDL_PIXELFORMAT_BGR888	      : return 24;
+    case SDL_PIXELFORMAT_BGRX8888	    : return 25;
+    case SDL_PIXELFORMAT_ARGB8888	    : return 26;
+    case SDL_PIXELFORMAT_RGBA8888		  : return 27;
+    case SDL_PIXELFORMAT_ABGR8888		  : return 28;
+    case SDL_PIXELFORMAT_BGRA8888	    : return 29;
+    case SDL_PIXELFORMAT_ARGB2101010	: return 30;
+    case SDL_PIXELFORMAT_YV12		      : return 31;
+    case SDL_PIXELFORMAT_IYUV		      : return 32;
+    case SDL_PIXELFORMAT_YUY2		      : return 33;
+    case SDL_PIXELFORMAT_UYVY		      : return 34;
+    case SDL_PIXELFORMAT_YVYU		      : return 35;
   }
 }

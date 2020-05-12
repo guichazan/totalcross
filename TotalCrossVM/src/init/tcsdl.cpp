@@ -8,7 +8,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-only
 
-#define BITS_PER_PIXEL 16
 #define PIXEL_NATIVE_FORMAT 1
 #define DISPLAY_INDEX 0
 #define NO_FLAGS 0
@@ -38,7 +37,7 @@ int initSDL(ScreenSurface screen) {
   if(SDL_GetDisplayBounds(DISPLAY_INDEX, &rect) < 0 ) {
     printf("SDL_GetDisplayBounds failed: %s\n", SDL_GetError());
   }
-  
+
   // Create the window
   window = SDL_CreateWindow("TotalCross SDK", 
                             SDL_WINDOWPOS_UNDEFINED,
@@ -52,10 +51,6 @@ int initSDL(ScreenSurface screen) {
 
   // Get the size of a window's client area.
   SDL_GetWindowSize(window, &screen->screenW, &screen->screenH);
-  // Adjusts screen's BPP
-  screen->bpp = BITS_PER_PIXEL;
-  // Adjusts screen's pixel format
-  screen->pixels = (uint8*)PIXEL_NATIVE_FORMAT;
 
   // Create a 2D rendering context for a window.
   renderer = SDL_CreateRenderer(window, -1, NO_FLAGS);
@@ -64,7 +59,6 @@ int initSDL(ScreenSurface screen) {
   }
 
   // Print renderer driver information
-  
   SDL_GetRendererInfo(renderer, &rendererInfo);
   printf("Renderer info: %s\n", rendererInfo.name);
 
@@ -76,6 +70,11 @@ int initSDL(ScreenSurface screen) {
   if(surfaceSDL == NULL) {
     printf("SDL_GetWindowSurface failed: %s\n", SDL_GetError());
   }
+
+  // Adjusts screen's BPP
+  screen->bpp = surfaceSDL->format->BitsPerPixel;
+  // Adjusts screen's pixel format
+  screen->pixels = (uint8*)PIXEL_NATIVE_FORMAT;
 
   // Create a texture from an existing surfaceSDL.
   texture = SDL_CreateTextureFromSurface(renderer, surfaceSDL);

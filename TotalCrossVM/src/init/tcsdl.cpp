@@ -13,11 +13,13 @@
 #define DISPLAY_INDEX 0
 #define NO_FLAGS 0
 #define PITCH_MULTIPLIER 4
+#define TICKS_FOR_NEXT_FRAME 22
 
 #include "tcsdl.h"
 
 SDL_Window *window;
 SDL_Surface *surfaceSDL;
+SDL_RendererInfo rendererInfo;
 
 static SDL_Renderer *renderer;
 static SDL_Texture *texture;
@@ -62,7 +64,7 @@ int initSDL(ScreenSurface screen) {
   }
 
   // Print renderer driver information
-  SDL_RendererInfo rendererInfo;
+  
   SDL_GetRendererInfo(renderer, &rendererInfo);
   printf("Renderer info: %s\n", rendererInfo.name);
 
@@ -84,24 +86,40 @@ int initSDL(ScreenSurface screen) {
 }
 
 void updateScreenSDL(int w, int h, void *pixels) {
-  // Set a texture as the current rendering target.
-  SDL_SetRenderTarget(renderer, texture);
-  // Update the given texture rectangle with new pixel data.
-  SDL_UpdateTexture(texture, NULL, pixels, w * PITCH_MULTIPLIER);
+  if (strEq(rendererInfo.name,"software")) {
+    SDL_UpdateWindowSurface(window);
+  }
+  else {
+    // Set a texture as the current rendering target.
+    SDL_SetRenderTarget(renderer, texture);
+    // Update the given texture rectangle with new pixel data.
+    SDL_UpdateTexture(texture, NULL, pixels, w * PITCH_MULTIPLIER);
+  }
+
   // Call SDL render present 
   presentSDL();
 }
 
 void presentSDL() {
-  // This function clears the entire rendering target, ignoring the viewport and
-  // the clip rectangle.
-  SDL_RenderClear(renderer);
-  // Copy a portion of the texture to the current rendering target.
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-  // Update the screen with rendering performed.
-  SDL_RenderPresent(renderer);
+  if (strEq(rendererInfo.name,"software")) {
+    printf("Renderer info: software present\n");
+    if (SDL_TICKS_PASSED(SDL_GetTicks(), timeout)) {
+      // SDL_RenderPresent(renderer);
+      SDL_UpdateWindowSurface(window);
+      timeout = SDL_GetTicks() + TICKS_FOR_NEXT_FRAME;
+    }
+  }
+  else {
+    printf("Renderer info: %s present", rendererInfo.name);
+    // This function clears the entire rendering target, ignoring the viewport and
+    // the clip rectangle.
+    SDL_RenderClear(renderer);
+    // Copy a portion of the texture to the current rendering target.
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // Update the screen with rendering performed.
+    SDL_RenderPresent(renderer);
+  }
 }
-
 int pixelFormatSDL (int pixelFormat) {
   switch (pixelFormat) { 
     case SDL_PIXELFORMAT_UNKNOWN    	: return  0;

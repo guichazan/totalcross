@@ -158,11 +158,13 @@ void initSkia(int w, int h)
 // Tells Skia to fullfill all draw commands
 void flushSkia()
 {
-    // printf("Step 14: before flush\n");
+    printf("Step 14: before flush\n");
     canvas->flush();
-    // printf("Step 15: after flush\n");
+    printf("Step 15: after flush\n");
 #ifdef HEADLESS
+    printf("Step 16: before update\n");
     updateScreenSDL(bitmap.width(), bitmap.height(), bitmap.getPixels());
+    printf("Step 17: after update\n");
     // updateScreenSDL(0, 0, NULL);
 #endif
 }
